@@ -3,9 +3,9 @@ package com.lgutierrez.crud.controller;
 import java.util.List;
 import java.util.UUID;
 
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lgutierrez.crud.exception.ResourceNotFoundException;
 import com.lgutierrez.crud.model.Person;
 import com.lgutierrez.crud.service.PersonService;
 
@@ -28,8 +29,9 @@ public class PersonController {
 	private PersonService personService;
 	
 	@PostMapping()
-	public void addPerson(@RequestBody @Validated Person person) {
+	public ResponseEntity<String> addPerson(@RequestBody @Validated Person person) {
 		personService.addPerson(person);
+		return ResponseEntity.ok("Person was created");
 	}
 	
 	@GetMapping()
@@ -39,7 +41,11 @@ public class PersonController {
 	
 	@GetMapping(path="{id}")
 	public Person getPerson(@PathVariable("id") UUID id) {
-		return personService.getPersonByID(id);
+		Person person = personService.getPersonByID(id);
+		if(person==null) {
+			throw new ResourceNotFoundException();
+		}
+		return person;
 	}
 	
 	@PutMapping(path="{id}")
